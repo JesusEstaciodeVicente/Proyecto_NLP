@@ -1,0 +1,1 @@
+streamlit run Proyecto_NLP.py app

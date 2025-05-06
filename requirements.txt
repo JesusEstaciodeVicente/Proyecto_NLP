@@ -1,0 +1,25 @@
+# Dependencias principales
+pandas>=1.3.0
+numpy>=1.20.0
+matplotlib>=3.4.0
+seaborn>=0.11.0
+nltk>=3.6.2
+scikit-learn>=1.0.0
+streamlit>=1.10.0
+
+# Procesamiento de texto y NLP
+spacy>=3.2.0
+gensim>=4.1.2
+wordcloud>=1.8.1
+
+# Utilidades de rendimiento y desarrollo
+joblib>=1.1.0
+tqdm>=4.62.0
+
+# Visualización avanzada
+plotly>=5.3.0
+altair>=4.2.0
+
+# Exportación e intercambio de datos
+openpyxl>=3.0.9
+xlrd>=2.0.1 
