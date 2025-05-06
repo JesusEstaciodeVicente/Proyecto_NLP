@@ -44,8 +44,11 @@ warnings.filterwarnings('ignore', category=Warning)
 
 # Definir semilla aleatoria global para reproducibilidad
 RANDOM_SEED = 1976
+BOTONAZO = 0
 
-# Función para mostrar mensajes de progreso
+############################################
+####### MOSTRAR MENSAJES DE PROGRESO #########
+############################################
 def print_status(message, verbose=True):
     """Muestra un mensaje de estado formateado con la hora actual"""
     if verbose:
@@ -65,7 +68,9 @@ for resource in ['punkt', 'stopwords', 'wordnet', 'vader_lexicon']:
 
 print_status("Recursos NLTK descargados correctamente.")
 
-# Función para limpiar y preprocesar el texto
+############################################
+####### PREPROCESAR TEXTO #########
+############################################
 def preprocess_text(text):
     if isinstance(text, str):
         # Convertir a minúsculas
@@ -91,7 +96,9 @@ def preprocess_text(text):
     else:
         return ''
 
-# Función para analizar el sentimiento del texto
+############################################
+####### ANALIZAR SENTIMIENTO #########
+############################################
 def analyze_sentiment(text):
     if isinstance(text, str):
         sia = SentimentIntensityAnalyzer()
@@ -100,7 +107,9 @@ def analyze_sentiment(text):
     else:
         return {'neg': 0, 'neu': 0, 'pos': 0, 'compound': 0}
 
-# Función para normalizar archivos CSV si es necesario
+############################################
+####### NORMALIZAR ARCHIVO CSV #########
+############################################
 def normalize_csv_file(file_path):
     """Normaliza un archivo CSV si es necesario, asegurando formato consistente"""
     print_status(f"Verificando y normalizando archivo: {file_path}")
@@ -133,7 +142,9 @@ def normalize_csv_file(file_path):
         print_status(f"ERROR al analizar archivo: {str(e)}")
         return False
 
-# Función para cargar y preprocesar los datos
+############################################
+####### CARGAR Y PREPROCESAR DATOS #########
+############################################
 def load_data(print_status=print_status):
     print_status("Iniciando carga de datos...")
     
@@ -259,7 +270,9 @@ def load_data(print_status=print_status):
     print_status("Carga y preprocesamiento de datos completados.")
     return train_data, test_data
 
-# Función para entrenar y evaluar modelos con más parámetros y búsqueda de hiperparámetros
+############################################
+####### ENTRENAR Y EVALUAR MODELOS #########
+############################################
 def train_evaluate_models(train_data, print_status=print_status):
     print_status("Preparando datos para entrenamiento y validación...")
     # Dividir datos para entrenamiento y validación
@@ -512,7 +525,9 @@ def train_evaluate_models(train_data, print_status=print_status):
     
     return results, best_model
 
-# Función para hacer predicciones en el conjunto de prueba
+############################################
+####### HACER PREDICCIONES #########
+############################################
 def make_predictions(test_data, model, print_status=print_status):
     print_status("Preprocesando datos de prueba...")
     test_data_copy = test_data.copy()  # Trabajar con una copia para no modificar el original
@@ -542,7 +557,9 @@ def make_predictions(test_data, model, print_status=print_status):
     
     return predictions
 
-# Función principal para entrenar modelo y generar predicciones
+############################################
+####### FUNCIÓN PRINCIPAL #########
+############################################
 def main():
     print_status("="*80)
     print_status("INICIANDO PROYECTO DE CLASIFICACIÓN DE NOTICIAS CON NLP")
@@ -587,7 +604,9 @@ def main():
     print_status("\nProceso completo. Archivo de predicciones generado.")
     print_status("="*80)
 
-# Función para la aplicación Streamlit
+############################################
+####### INTERFAZ STREAMLIT #########
+############################################
 def get_image_base64(img_path):
     img = Image.open(img_path).convert("RGBA").resize((120, 120))
     buffered = BytesIO()
@@ -693,11 +712,13 @@ def run_app():
         Al pulsar el botón **COMENZAR**, se iniciará todo el proceso: carga de datos, entrenamiento, evaluación, predicción y generación de resultados. Los mensajes de avance y resultados aparecerán aquí en pantalla.
         """)
         status_msgs = []
-        if 'procesando' not in st.session_state:
-            st.session_state['procesando'] = False
-        boton = st.button("COMENZAR", key="comenzar_btn", disabled=st.session_state['procesando'])
         status_placeholder = st.empty()
         copy_placeholder = st.empty()
+        if 'procesando' not in st.session_state:
+            st.session_state['procesando'] = False
+        if 'BOTONAZO' not in st.session_state:
+            st.session_state['BOTONAZO'] = 0
+        boton = st.button("COMENZAR", key="comenzar_btn", disabled=st.session_state['procesando'])
         def print_status(message, verbose=True):
             if verbose:
                 current_time = time.strftime("%H:%M:%S", time.localtime())
@@ -707,35 +728,123 @@ def run_app():
                     '<br>'.join(status_msgs) + '</div>',
                     unsafe_allow_html=True
                 )
-                # Actualizar el botón copiar con el contenido actual
-                copy_placeholder.markdown(f'''
-                    <button onclick="navigator.clipboard.writeText(document.getElementById('mensajes-box').innerText)" style="margin-top:10px;padding:6px 18px;font-size:16px;background:#1976D2;color:white;border:none;border-radius:6px;cursor:pointer;">Copiar</button>
-                ''', unsafe_allow_html=True)
         if boton:
             st.session_state['procesando'] = True
-            try:
-                # Inicialización y setup SOLO aquí
-                print_status("Iniciando procesamiento de lenguaje natural...")
-                print_status("Configurando entorno y dependencias...")
-                print_status("Descargando recursos de NLTK (si no están ya instalados)...")
-                for resource in ['punkt', 'stopwords', 'wordnet', 'vader_lexicon']:
-                    print_status(f"  - Descargando recurso NLTK: {resource}")
-                    nltk.download(resource, quiet=True)
-                print_status("Recursos NLTK descargados correctamente.")
-                print_status(f"Ejecutando en Python {sys.version}")
-                print_status(f"Semilla aleatoria: {RANDOM_SEED}")
-                print_status("Iniciando aplicación Streamlit...")
-                # Flujo principal
-                train_data, test_data = load_data(print_status=print_status)
-                results, best_model = train_evaluate_models(train_data, print_status=print_status)
-                predictions = make_predictions(test_data, best_model, print_status=print_status)
-                print_status("\nProceso completo. Archivo de predicciones generado.")
-                st.success("¡Proceso finalizado! Revisa el archivo DATA/predictions.csv y los resultados generados.")
-            except Exception as e:
-                st.error(f"Ocurrió un error durante la ejecución: {e}")
+            with st.spinner('Trabajando. Un momento, por favor...'):
+                try:
+                    print_status("Iniciando procesamiento de lenguaje natural...")
+                    print_status("Configurando entorno y dependencias...")
+                    print_status("Descargando recursos de NLTK (si no están ya instalados)...")
+                    import nltk
+                    for resource in ['punkt', 'stopwords', 'wordnet', 'vader_lexicon']:
+                        print_status(f"  - Descargando recurso NLTK: {resource}")
+                        nltk.download(resource, quiet=True)
+                    print_status("Recursos NLTK descargados correctamente.")
+                    import sys
+                    print_status(f"Ejecutando en Python {sys.version}")
+                    print_status(f"Semilla aleatoria: {RANDOM_SEED}")
+                    print_status("Iniciando aplicación Streamlit...")
+                    train_data, test_data = load_data(print_status=print_status)
+                    results, best_model = train_evaluate_models(train_data, print_status=print_status)
+                    predictions = make_predictions(test_data, best_model, print_status=print_status)
+                    print_status("\nProceso completo. Archivo de predicciones generado.")
+                    st.success("¡Proceso finalizado! Revisa el archivo DATA/predictions.csv y los resultados generados.")
+                    st.session_state['BOTONAZO'] = 1
+                except Exception as e:
+                    st.error(f"Ocurrió un error durante la ejecución: {e}")
             st.session_state['procesando'] = False
-        elif not st.session_state['procesando']:
-            st.info("Presiona el botón COMENZAR para iniciar el proceso.")
+        # BOTONAZO: mostrar botón grande, verde, centrado y funcional para ver resultados
+        if st.session_state['BOTONAZO'] == 1:
+            # Botón grande, verde, centrado y funcional para ver resultados
+            st.markdown("""
+                <style>
+                div.stButton > button#ver_resultados_btn {
+                    background: #43a047;
+                    color: white;
+                    font-size: 24px;
+                    font-weight: bold;
+                    border: none;
+                    border-radius: 14px;
+                    padding: 20px 60px;
+                    cursor: pointer;
+                    box-shadow: 0 2px 8px rgba(67,160,71,0.15);
+                    letter-spacing: 2px;
+                    margin: 30px auto 20px auto;
+                    display: block;
+                }
+                </style>
+            """, unsafe_allow_html=True)
+            col_pred = st.columns([1,2,1])
+            with col_pred[1]:
+                mostrar = st.button("VER RESULTADOS", key="ver_resultados_btn")
+            if mostrar:
+                import pandas as pd
+                try:
+                    df_pred = pd.read_csv("DATA/predictions.csv", sep="       ", names=["label", "title"], engine="python")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("<h3 style='color:#43a047;text-align:center;'>VERDADERO</h3>", unsafe_allow_html=True)
+                        st.dataframe(df_pred[df_pred['label']==1][['title']].rename(columns={'title':'Titular'}), use_container_width=True)
+                    with col2:
+                        st.markdown("<h3 style='color:#d32f2f;text-align:center;'>FALSO</h3>", unsafe_allow_html=True)
+                        st.dataframe(df_pred[df_pred['label']==0][['title']].rename(columns={'title':'Titular'}), use_container_width=True)
+                    # Mostrar automáticamente las gráficas debajo
+                    try:
+                        from wordcloud import WordCloud, STOPWORDS
+                        import matplotlib.pyplot as plt
+                        st.markdown("<h2 style='color:#1976D2;text-align:center;'>Análisis Visual de Resultados</h2>", unsafe_allow_html=True)
+                        # Gráfico de barras distribución
+                        st.subheader("Distribución de noticias clasificadas")
+                        fig1, ax1 = plt.subplots(figsize=(6,3))
+                        counts = df_pred['label'].value_counts().sort_index()
+                        ax1.bar(['Falso (0)', 'Verdadero (1)'], counts, color=['#d32f2f', '#43a047'])
+                        ax1.set_ylabel('Cantidad')
+                        ax1.set_xlabel('Clase')
+                        ax1.set_title('Distribución de clases')
+                        for i, v in enumerate(counts):
+                            ax1.text(i, v + 0.5, str(v), ha='center', fontweight='bold')
+                        st.pyplot(fig1)
+                        # Gráfico de pastel
+                        st.subheader("Proporción de clases (Pie Chart)")
+                        fig2, ax2 = plt.subplots(figsize=(4,4))
+                        ax2.pie(counts, labels=['Falso (0)', 'Verdadero (1)'], autopct='%1.1f%%', colors=['#d32f2f', '#43a047'], startangle=90, textprops={'fontsize': 14})
+                        ax2.axis('equal')
+                        st.pyplot(fig2)
+                        # Nube de palabras para cada clase
+                        st.subheader("Nube de palabras por clase")
+                        colw1, colw2 = st.columns(2)
+                        with colw1:
+                            st.markdown("<h4 style='color:#43a047;text-align:center;'>VERDADERO</h4>", unsafe_allow_html=True)
+                            text_true = ' '.join(df_pred[df_pred['label']==1]['title'].astype(str))
+                            wc_true = WordCloud(width=400, height=300, background_color='white', colormap='Greens', stopwords=STOPWORDS).generate(text_true)
+                            figw1, axw1 = plt.subplots(figsize=(4,3))
+                            axw1.imshow(wc_true, interpolation='bilinear')
+                            axw1.axis('off')
+                            st.pyplot(figw1)
+                        with colw2:
+                            st.markdown("<h4 style='color:#d32f2f;text-align:center;'>FALSO</h4>", unsafe_allow_html=True)
+                            text_false = ' '.join(df_pred[df_pred['label']==0]['title'].astype(str))
+                            wc_false = WordCloud(width=400, height=300, background_color='white', colormap='Reds', stopwords=STOPWORDS).generate(text_false)
+                            figw2, axw2 = plt.subplots(figsize=(4,3))
+                            axw2.imshow(wc_false, interpolation='bilinear')
+                            axw2.axis('off')
+                            st.pyplot(figw2)
+                        # Longitud de titulares por clase
+                        st.subheader("Longitud media de titulares por clase")
+                        df_pred['length'] = df_pred['title'].astype(str).apply(len)
+                        fig3, ax3 = plt.subplots(figsize=(6,3))
+                        means = df_pred.groupby('label')['length'].mean()
+                        ax3.bar(['Falso (0)', 'Verdadero (1)'], means, color=['#d32f2f', '#43a047'])
+                        ax3.set_ylabel('Longitud media')
+                        ax3.set_xlabel('Clase')
+                        ax3.set_title('Longitud media de titulares')
+                        for i, v in enumerate(means):
+                            ax3.text(i, v + 0.5, f"{v:.1f}", ha='center', fontweight='bold')
+                        st.pyplot(fig3)
+                    except Exception as e:
+                        st.error(f"No se pudieron generar las gráficas: {e}")
+                except Exception as e:
+                    st.error(f"No se pudo cargar el archivo de predicciones: {e}")
 
 # El bloque if __name__ == '__main__' solo ejecuta main() o run_app(), sin imprimir mensajes directamente.
 if __name__ == '__main__':
