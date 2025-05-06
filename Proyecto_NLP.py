@@ -705,7 +705,7 @@ def run_app():
         
         Todo el proceso está automatizado y optimizado para obtener el mejor rendimiento posible.
         """)
-        st.info("Puede desplazarse hacia abajo para ver todo el flujo si es necesario.")
+        st.info("Se podrá desplazar hacia abajo para ver todo el flujo si fuera necesario.")
     elif seccion == "Ejecución y Resultados":
         st.header("Ejecución del proceso y resultados")
         st.markdown("""
