@@ -788,61 +788,6 @@ def run_app():
                     with col2:
                         st.markdown("<h3 style='color:#d32f2f;text-align:center;'>FALSO</h3>", unsafe_allow_html=True)
                         st.dataframe(df_pred[df_pred['label']==0][['title']].rename(columns={'title':'Titular'}), use_container_width=True)
-                    # Mostrar automáticamente las gráficas debajo
-                    try:
-                        from wordcloud import WordCloud, STOPWORDS
-                        import matplotlib.pyplot as plt
-                        st.markdown("<h2 style='color:#1976D2;text-align:center;'>Análisis Visual de Resultados</h2>", unsafe_allow_html=True)
-                        # Gráfico de barras distribución
-                        st.subheader("Distribución de noticias clasificadas")
-                        fig1, ax1 = plt.subplots(figsize=(6,3))
-                        counts = df_pred['label'].value_counts().sort_index()
-                        ax1.bar(['Falso (0)', 'Verdadero (1)'], counts, color=['#d32f2f', '#43a047'])
-                        ax1.set_ylabel('Cantidad')
-                        ax1.set_xlabel('Clase')
-                        ax1.set_title('Distribución de clases')
-                        for i, v in enumerate(counts):
-                            ax1.text(i, v + 0.5, str(v), ha='center', fontweight='bold')
-                        st.pyplot(fig1)
-                        # Gráfico de pastel
-                        st.subheader("Proporción de clases (Pie Chart)")
-                        fig2, ax2 = plt.subplots(figsize=(4,4))
-                        ax2.pie(counts, labels=['Falso (0)', 'Verdadero (1)'], autopct='%1.1f%%', colors=['#d32f2f', '#43a047'], startangle=90, textprops={'fontsize': 14})
-                        ax2.axis('equal')
-                        st.pyplot(fig2)
-                        # Nube de palabras para cada clase
-                        st.subheader("Nube de palabras por clase")
-                        colw1, colw2 = st.columns(2)
-                        with colw1:
-                            st.markdown("<h4 style='color:#43a047;text-align:center;'>VERDADERO</h4>", unsafe_allow_html=True)
-                            text_true = ' '.join(df_pred[df_pred['label']==1]['title'].astype(str))
-                            wc_true = WordCloud(width=400, height=300, background_color='white', colormap='Greens', stopwords=STOPWORDS).generate(text_true)
-                            figw1, axw1 = plt.subplots(figsize=(4,3))
-                            axw1.imshow(wc_true, interpolation='bilinear')
-                            axw1.axis('off')
-                            st.pyplot(figw1)
-                        with colw2:
-                            st.markdown("<h4 style='color:#d32f2f;text-align:center;'>FALSO</h4>", unsafe_allow_html=True)
-                            text_false = ' '.join(df_pred[df_pred['label']==0]['title'].astype(str))
-                            wc_false = WordCloud(width=400, height=300, background_color='white', colormap='Reds', stopwords=STOPWORDS).generate(text_false)
-                            figw2, axw2 = plt.subplots(figsize=(4,3))
-                            axw2.imshow(wc_false, interpolation='bilinear')
-                            axw2.axis('off')
-                            st.pyplot(figw2)
-                        # Longitud de titulares por clase
-                        st.subheader("Longitud media de titulares por clase")
-                        df_pred['length'] = df_pred['title'].astype(str).apply(len)
-                        fig3, ax3 = plt.subplots(figsize=(6,3))
-                        means = df_pred.groupby('label')['length'].mean()
-                        ax3.bar(['Falso (0)', 'Verdadero (1)'], means, color=['#d32f2f', '#43a047'])
-                        ax3.set_ylabel('Longitud media')
-                        ax3.set_xlabel('Clase')
-                        ax3.set_title('Longitud media de titulares')
-                        for i, v in enumerate(means):
-                            ax3.text(i, v + 0.5, f"{v:.1f}", ha='center', fontweight='bold')
-                        st.pyplot(fig3)
-                    except Exception as e:
-                        st.error(f"No se pudieron generar las gráficas: {e}")
                 except Exception as e:
                     st.error(f"No se pudo cargar el archivo de predicciones: {e}")
 
